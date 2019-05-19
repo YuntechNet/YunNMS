@@ -1,0 +1,5 @@
+[run]
+omit = 
+    35venv/*
+    tests/*
+    setup.py
