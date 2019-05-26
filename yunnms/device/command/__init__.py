@@ -11,7 +11,6 @@ __all__ = [
 ]
 
 
-
 class HelpCmd(Command):
     """HelpCmd
         show the help for peers.
@@ -71,21 +70,22 @@ class NewCmd(Command):
         super(NewCmd, self).__init__('new')
         self.device_manager = device_manager
         self.peer = device_manager.peer
-    
+
     def onProcess(self, msg_arr):
         device_type = msg[0]
         device_name = msg[1]
         if device_name in self.device_manager._devices:
             return '{} already exists'.format(device_name)
 
-        snmpv3 = SNMPv3(snmpEngine=self.device_manager._snmp_engine, authentication={
-            'host': (msg[2], 161),
-            'account': msg[3],
-            'authProtocol': msg[4],
-            'authPassword': msg[5],
-            'privProtocol': msg[6],
-            'privPassword': msg[7]
-        })
+        snmpv3 = SNMPv3(
+            snmpEngine=self.device_manager._snmp_engine, authentication={
+                'host': (msg[2], 161),
+                'account': msg[3],
+                'authProtocol': msg[4],
+                'authPassword': msg[5],
+                'privProtocol': msg[6],
+                'privPassword': msg[7]
+                })
         if device_type == 'CiscoSwitch':
             added_device = CiscoSwitchDevice(
                 ame=device_name, snmp_conn=snmpv3)

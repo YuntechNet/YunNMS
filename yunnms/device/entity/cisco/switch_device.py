@@ -1,11 +1,12 @@
 from .switch_device_info import SwitchDeviceInfo
 from yunnms.device.entity.device import Device
 
+
 class SwitchDevice(Device):
 
     def __init__(self, name: str, snmp_conn: 'SNMPv3Connection',
                  ssh_conn: 'SSHConnection' = None,
-                 telnet_conn : 'TelnetConnection' = None) -> None:
+                 telnet_conn: 'TelnetConnection' = None) -> None:
         super(SwitchDevice, self).__init__(
             name=name, snmp_conn=snmp_conn, ssh_conn=ssh_conn,
             telnet_conn=telnet_conn)

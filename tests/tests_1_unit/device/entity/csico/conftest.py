@@ -12,5 +12,4 @@ def test_cisco_device_info():
 @pytest.fixture(scope='session')
 def test_cisco_switch_device():
     return CiscoSwitchDevice(
-        name='test'
-    )
+        name='test')

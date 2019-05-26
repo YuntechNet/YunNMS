@@ -27,6 +27,7 @@ def test_update(test_device):
     with pytest.raises(NotImplementedError):
         test_device.update()
 
+
 def test___update_from_snmp_v3(test_device):
     with pytest.raises(NotImplementedError):
         test_device._Device__update_from_snmp_v3()
@@ -40,6 +41,7 @@ def test___update_from_ssh(test_device):
 def test___update_from_telnet(test_device):
     with pytest.raises(NotImplementedError):
         test_device._Device__update_from_telnet()
+
 
 def test_str(test_device):
     with pytest.raises(NotImplementedError):

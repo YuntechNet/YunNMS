@@ -7,7 +7,7 @@ class ConnectionCmd(Command):
     """
         Command to modified connections of a device.
         Usage in prompt:
-            device [connection/conn] 
+            device [connection/conn]
     """
 
     def __init__(self, device):
@@ -17,7 +17,7 @@ class ConnectionCmd(Command):
         self.commands = {
             'add': AddCmd(self.device)
         }
-    
+
     def onProcess(self, msg_arr, **kwargs):
         try:
             msg_key = msg_arr[0].lower()
@@ -41,12 +41,12 @@ class AddCmd(Command):
         super(AddCmd, self).__init__('connection.add')
         self.device = device
         self.peer = device.peer
-    
+
     def onProcess(self, msg_arr):
         device_name = msg_arr[0]
         if device_name not in self.device._devices:
             return '{} not exists'.format(device_name)
-        
+
         device = self.device._devices[device_name]
         conn_type = msg_arr[1]
         if conn_type == 'ssh':

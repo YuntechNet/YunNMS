@@ -7,7 +7,7 @@ class Device(object):
                  ssh_conn: 'SSHConnection' = None,
                  telnet_conn: 'TelnetConnection' = None) -> None:
         """Init of Device
-        
+
         Attribute:
             name: name of this device.
             snmp_conn: SNMPv3Connection for this device.
@@ -18,7 +18,7 @@ class Device(object):
         self._snmp_conn = snmp_conn
         self._ssh_conn = ssh_conn
         self._telnet_conn = telnet_conn
-    
+
     def set_snmp_conn(self, snmp_conn: 'SNMPv3Connection') -> None:
         self._snmp_conn = snmp_conn
 
