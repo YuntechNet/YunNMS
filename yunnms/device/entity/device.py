@@ -1,74 +1,57 @@
-from .device_info import DeviceInfo
-from .interface import Interface
-from yunnms.device.connection import (
-    SNMPv3Connection as SNMPv3Conn, TelnetConnection as TelnetConn,
-    SSHConnection as SSHConn
-)
 
 
 class Device(object):
+    """Base class for extend"""
 
-    def __init__(self, connect_type, host, account, passwd, snmpEngine=None,
-                 link_level=None, auth_protocol=None, priv_protocol=None,
-                 auth_password=None, priv_password=None):
-        self.authentication = \
-            self.create_authentication(
-                connect_type=connect_type, host=host, link_level=link_level,
-                account=account, password=passwd,
-                auth_protocol=auth_protocol, auth_password=auth_password,
-                priv_protocol=priv_protocol, priv_password=priv_password)
-        self.connect_type = connect_type
-        if connect_type == 'snmp':
-            assert snmpEngine is not None
-            self.connection = SNMPv3Conn(snmpEngine=snmpEngine,
-                                         authentication=self.authentication)
-        else:
-            self.connection = SSHConn(authentication=self.authentication) if \
-                              connect_type == 'ssh' else \
-                              TelnetConn(authentication=self.authentication)
-        self.info = None
-        self.interfaces = []
+    def __init__(self, name: str, snmp_conn: 'SNMPv3Connection',
+                 ssh_conn: 'SSHConnection' = None,
+                 telnet_conn: 'TelnetConnection' = None) -> None:
+        """Init of Device
+        
+        Attribute:
+            name: name of this device.
+            snmp_conn: SNMPv3Connection for this device.
+            ssh_conn: SSHConnection for this device.
+            telnet_conn: TelnetConnection for this device.
+        """
+        self._name = name
+        self._snmp_conn = snmp_conn
+        self._ssh_conn = ssh_conn
+        self._telnet_conn = telnet_conn
+    
+    def set_snmp_conn(self, snmp_conn: 'SNMPv3Connection') -> None:
+        self._snmp_conn = snmp_conn
 
-    def create_authentication(self, connect_type, host, account, password=None,
-                              link_level=None, auth_protocol=None,
-                              priv_protocol=None, auth_password=None,
-                              priv_password=None):
-        authentication = {
-            'connect_type': connect_type,
-            'host': host,
-            'account': account
-        }
-        if connect_type == 'ssh' or connect_type == 'telnet':
-            authentication['password'] = password
-        elif connect_type == 'snmp':
-            authentication['link_level'] = link_level
-            authentication['auth_protocol'] = auth_protocol
-            authentication['priv_protocol'] = priv_protocol
-            authentication['auth_password'] = auth_password
-            authentication['priv_password'] = priv_password
-        return authentication
+    def set_ssh_conn(self, ssh_conn: 'SSHConnection') -> None:
+        self._ssh_conn = ssh_conn
 
-    def snmp_v3_init(self):
-        self.info = DeviceInfo.snmp_v3_init(conn=self.connection)
-        self.interfaces = Interface.snmp_v3_init(conn=self.connection)
+    def set_telnet_conn(self, telnet_conn: 'TelnetConnection') -> None:
+        self._telnet_conn = telnet_conn
 
-    def fetch_running_config(self):
-        self.connection.login()
-        output = self.connection.send_commands(
-                       commands=['show run'], time_sleep=2, short=False)
-        self.connection.logout()
-        self.info = DeviceInfo.fromString(string=output)
-        return output
+    def update(self) -> None:
+        """Main update method called from manager loop"""
+        raise NotImplementedError
 
-    def fetch_interface_status(self):
-        self.connection.login()
-        output = self.connection.send_commands(
-                       commands=['show interface status'], short=False)
-        self.connection.logout()
-        self.interfaces = Interface.fromString(string=output)
-        return output
+    def __update_from_snmp_v3(self) -> None:
+        """Implementation of SNMPv3 update informations
+        This method is only called by update method.
+        And it's explains how to use SNMPv3Connection to get informations.
+        """
+        raise NotImplementedError
+
+    def __update_from_ssh(self) -> None:
+        """Implementation of SSH update informations
+        This method is only called by update method.
+        And it's explains how to use SSHConnection to get informations.
+        """
+        raise NotImplementedError
+
+    def __update_from_telnet(self) -> None:
+        """Implementation of Telnet update informations
+        This method is only called by update method.
+        And it's explains how to use TelnetConnection to get informations.
+        """
+        raise NotImplementedError
 
     def __str__(self):
-        return 'Device<connect_type={}, host={}>'.format(
-                    self.authentication['connect_type'],
-                    self.authentication['host'])
+        raise NotImplementedError

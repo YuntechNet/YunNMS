@@ -4,7 +4,7 @@ from atomic_p2p.peer import Peer
 from atomic_p2p.utils.manager import ProcManager
 from atomic_p2p.utils.logging import getLogger
 
-from .command import HelpCmd, AddCmd, RemoveCmd, ListCmd
+from .command import HelpCmd, RemoveCmd, ListCmd, NewCmd, ConnectionCmd
 from .trap_server import TrapServer
 
 
@@ -15,7 +15,7 @@ class DeviceManager(ProcManager):
         super(DeviceManager, self).__init__(
             loopDelay=loop_delay, auto_register=True,
             logger=getLogger(__name__))
-        self.devices = []
+        self._devices = {}
         self._snmp_engine = SnmpEngine()
         # self.trap_server = TrapServer()
 
@@ -23,11 +23,14 @@ class DeviceManager(ProcManager):
         pass
 
     def _register_command(self):
+        conn_cmd = ConnectionCmd(self)
         self.commands = {
             'help': HelpCmd(self),
-            'add': AddCmd(self),
             'remove': RemoveCmd(self),
-            'list': ListCmd(self)
+            'list': ListCmd(self),
+            'new': NewCmd(self),
+            'connection': conn_cmd,
+            'conn': conn_cmd
         }
 
     def onProcess(self, msg_arr, **kwargs):
@@ -52,11 +55,6 @@ class DeviceManager(ProcManager):
         while not self.stopped.wait(self.loopDelay):
             pass
 
-    def addDevice(self, device):
-        if type(device) is Device and device not in self.devices:
-            self.devices.append(device)
-            if device.connect_type == 'snmp':
-                device.snmp_v3_init()
-            else:
-                device.fetch_running_config()
-                device.fetch_interface_status()
+    def add_device(self, name, device):
+        if type(device) is Device and name not in self._devices:
+            self._devices[name] = device
