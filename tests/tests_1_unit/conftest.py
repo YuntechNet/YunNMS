@@ -2,7 +2,7 @@ import pytest
 from os import getcwd
 from time import sleep
 
-from atomic_p2p.peer import Peer
+from atomic_p2p.peer import ThreadPeer
 from atomic_p2p.utils.security import create_self_signed_cert as cssc
 
 from yunnms.device import DeviceManager
@@ -10,9 +10,9 @@ from yunnms.device import DeviceManager
 
 @pytest.yield_fixture(scope='module')
 def default_peer():
-    p = Peer(host=('0.0.0.0', 8000), name='name', role='role',
+    p = ThreadPeer(host=('0.0.0.0', 8000), name='name', role='role',
              cert=cssc(getcwd(), 'data/test.pem', 'data/test.key'),
-             _hash="THIS IS A HASH")
+             program_hash="THIS IS A HASH", ns=None)
     p.start()
 
     yield p

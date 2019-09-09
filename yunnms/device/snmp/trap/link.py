@@ -1,0 +1,2 @@
+class LinkMixin(object):
+    pass

@@ -4,6 +4,10 @@ from .cisco import CiscoSwitchDevice, CiscoSwitchDeviceInfo, Interface
 from .enums import SpeedRate
 
 __all__ = [
-    Device, DeviceInfo, SpeedRate, Interface,
-    CiscoSwitchDevice, CiscoSwitchDeviceInfo
+    "Device",
+    "DeviceInfo",
+    "SpeedRate",
+    "Interface",
+    "CiscoSwitchDevice",
+    "CiscoSwitchDeviceInfo",
 ]

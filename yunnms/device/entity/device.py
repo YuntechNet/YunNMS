@@ -1,11 +1,13 @@
-
-
 class Device(object):
     """Base class for extend"""
 
-    def __init__(self, name: str, snmp_conn: 'SNMPv3Connection',
-                 ssh_conn: 'SSHConnection' = None,
-                 telnet_conn: 'TelnetConnection' = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        snmp_conn: "SNMPv3Connection",
+        ssh_conn: "SSHConnection" = None,
+        telnet_conn: "TelnetConnection" = None,
+    ) -> None:
         """Init of Device
 
         Attribute:
@@ -19,13 +21,13 @@ class Device(object):
         self._ssh_conn = ssh_conn
         self._telnet_conn = telnet_conn
 
-    def set_snmp_conn(self, snmp_conn: 'SNMPv3Connection') -> None:
+    def set_snmp_conn(self, snmp_conn: "SNMPv3Connection") -> None:
         self._snmp_conn = snmp_conn
 
-    def set_ssh_conn(self, ssh_conn: 'SSHConnection') -> None:
+    def set_ssh_conn(self, ssh_conn: "SSHConnection") -> None:
         self._ssh_conn = ssh_conn
 
-    def set_telnet_conn(self, telnet_conn: 'TelnetConnection') -> None:
+    def set_telnet_conn(self, telnet_conn: "TelnetConnection") -> None:
         self._telnet_conn = telnet_conn
 
     def update(self) -> None:

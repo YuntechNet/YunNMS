@@ -1,60 +1,61 @@
+from threading import Thread, Event as tEvent
+
 from pysnmp.hlapi.asyncore import SnmpEngine
 
 from atomic_p2p.peer import Peer
-from atomic_p2p.utils.manager import ProcManager
-from atomic_p2p.utils.logging import getLogger
 
+from yunnms.role import Role
+from .entity import Device
+from .communication import SyncHandler
 from .command import HelpCmd, RemoveCmd, ListCmd, NewCmd, ConnectionCmd
-from .trap_server import TrapServer
+from .snmp import TrapServer
 
 
-class DeviceManager(ProcManager):
+class DeviceManager(Thread):
+    def __init__(self, peer: "Peer", loop_delay: int = 60):
+        super(DeviceManager, self).__init__()
+        self.loop_delay = loop_delay
+        self.stopped = tEvent()
+        self.started = tEvent()
 
-    def __init__(self, peer, loop_delay=60):
         self.peer = peer
-        super(DeviceManager, self).__init__(
-            loopDelay=loop_delay, auto_register=True,
-            logger=getLogger(__name__))
+        self._register_handler()
+        self._register_command()
+
         self._devices = {}
         self._snmp_engine = SnmpEngine()
         # self.trap_server = TrapServer()
 
-    def _register_handler(self):
-        pass
-
-    def _register_command(self):
-        conn_cmd = ConnectionCmd(self)
-        self.commands = {
-            'help': HelpCmd(self),
-            'remove': RemoveCmd(self),
-            'list': ListCmd(self),
-            'new': NewCmd(self),
-            'connection': conn_cmd,
-            'conn': conn_cmd
-        }
-
-    def onProcess(self, msg_arr, **kwargs):
-        try:
-            msg_key = msg_arr[0].lower()
-            msg_arr = msg_arr[1:]
-            if msg_key in self.commands:
-                return self.commands[msg_key]._on_process(msg_arr)
-            return self.commands['help']._on_process(msg_arr)
-        except Exception as e:
-            return self.commands['help']._on_process(msg_arr)
-
     def start(self):
+        self.started.set()
         super(DeviceManager, self).start()
         # self.trap_server.start()    # L18
 
     def stop(self):
-        super(DeviceManager, self).stop()
+        self.stopped.set()
+        self.started.clear()
         # self.trap_server.stop()     # L18
 
     def run(self):
-        while not self.stopped.wait(self.loopDelay):
+        while self.stopped.wait(self.loop_delay) is False:
             pass
 
     def add_device(self, name, device):
         if type(device) is Device and name not in self._devices:
             self._devices[name] = device
+
+    def _register_handler(self):
+        installing_handler = [SyncHandler(self)]
+        for each in installing_handler:
+            self.peer.register_handler(handler=each)
+
+    def _register_command(self):
+        installing_commands = [
+            HelpCmd(self),
+            RemoveCmd(self),
+            ListCmd(self),
+            NewCmd(self),
+            ConnectionCmd(self),
+        ]
+        for each in installing_commands:
+            self.peer.register_command(command=each)
