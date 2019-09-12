@@ -1,9 +1,9 @@
-from .snmp import SNMPv3PollingAbs
+from yunnms.device.abc import SNMPv3PollingAbc
 
 
-class SystemInfo(SNMPv3PollingAbs):
+class SystemInfo(SNMPv3PollingAbc):
     @staticmethod
-    def polling(snmp_conn) -> "SystemInfo":
+    def polling(snmp_conn: "SNMPv3Connection") -> "SystemInfo":
         outputs = list(
             snmp_conn.next(
                 oids=[
@@ -28,3 +28,6 @@ class SystemInfo(SNMPv3PollingAbs):
         return "{}<CPU_USE: {}, MEM_USE: {}>".format(
             type(self).__name__, self.cpu_usage, self.memory_usage
         )
+
+    def __repr__(self) -> str:
+        return self.__str__()

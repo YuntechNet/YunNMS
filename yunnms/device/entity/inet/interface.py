@@ -1,10 +1,10 @@
 from re import compile as re_compile
 from pysnmp.hlapi import ObjectType, ObjectIdentity
 
-from yunnms.device.entity.snmp.mib import SNMPv3PollingAbs
+from yunnms.device.abc import SNMPv3PollingAbc
 
 
-class Interface(SNMPv3PollingAbs):
+class Interface(SNMPv3PollingAbc):
     @staticmethod
     def polling(snmp_conn: "SNMPv3Connection") -> "Interface":
         return [
@@ -30,7 +30,7 @@ class Interface(SNMPv3PollingAbs):
         speed: int,
         description: str = "",
         phisical_address: str = "",
-    ):
+    ) -> None:
         self.name = name
         self.description = description
         self.int_type = int_type
@@ -38,5 +38,8 @@ class Interface(SNMPv3PollingAbs):
         self.speed = speed
         self.phisical_address = phisical_address
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Interface<NAME={}, PH_ADDR={}>".format(self.name, self.phisical_address)
+
+    def __repr__(self) -> str:
+        return self.__str__()

@@ -1,4 +1,4 @@
-from yunnms.device.entity import CiscoSwitchSystemInfo
+from yunnms.device.entity.cisco import CiscoSwitchSystemInfo
 
 
 def test_str():
