@@ -22,7 +22,9 @@ def default_peer():
 
 @pytest.yield_fixture(scope='module')
 def default_device_manager(default_peer):
-    d = DeviceManager(peer=default_peer)
+    # trap_host should be ("0.0.0.0", 162) but due to Travis sudo.
+    # We need to use host & port which not touched system restrict.
+    d = DeviceManager(peer=default_peer, trap_host=("127.0.0.1", 10162))
     d.start()
 
     yield d

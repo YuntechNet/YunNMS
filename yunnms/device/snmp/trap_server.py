@@ -33,9 +33,7 @@ class TrapServer(ThreadManager):
         )
         self._mib_view_controller = view.MibViewController(self._mib_builder)
         config.addTransport(
-            self._snmp_engine,
-            udp.domainName,
-            udp.UdpTransport().openServerMode(host),
+            self._snmp_engine, udp.domainName, udp.UdpTransport().openServerMode(host)
         )
         ntfrcv.NotificationReceiver(self._snmp_engine, self.cbFun)
 

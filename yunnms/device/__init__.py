@@ -1,3 +1,4 @@
+from typing import Tuple
 from logging import getLogger
 
 from pysnmp.hlapi.asyncore import SnmpEngine
@@ -12,7 +13,13 @@ from .snmp import TrapServer
 
 
 class DeviceManager(ThreadManager):
-    def __init__(self, peer: "Peer", loop_delay: int = 60, logger=getLogger()):
+    def __init__(
+        self,
+        peer: "Peer",
+        trap_host: Tuple[str, int] = None,
+        loop_delay: int = 60,
+        logger=getLogger(),
+    ):
         super().__init__(loopDelay=loop_delay, logger=logger)
         self.peer = peer
         self._register_handler()
@@ -20,7 +27,7 @@ class DeviceManager(ThreadManager):
 
         self._devices = {}
         self._snmp_engine = SnmpEngine()
-        self.trap_server = TrapServer()
+        self.trap_server = TrapServer(host=trap_host)
 
     def start(self):
         super().start()
