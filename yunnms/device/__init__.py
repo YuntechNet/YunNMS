@@ -1,47 +1,41 @@
-from threading import Thread, Event as tEvent
+from logging import getLogger
 
 from pysnmp.hlapi.asyncore import SnmpEngine
-
-from atomic_p2p.peer import Peer
+from atomic_p2p.utils.manager import ThreadManager
+from atomic_p2p.peer import ThreadPeer
 
 from yunnms.role import Role
-from .entity import Device
+from yunnms.device.abc import DeviceABC
 from .communication import SyncHandler
 from .command import HelpCmd, RemoveCmd, ListCmd, NewCmd, ConnectionCmd
 from .snmp import TrapServer
 
 
-class DeviceManager(Thread):
-    def __init__(self, peer: "Peer", loop_delay: int = 60):
-        super(DeviceManager, self).__init__()
-        self.loop_delay = loop_delay
-        self.stopped = tEvent()
-        self.started = tEvent()
-
+class DeviceManager(ThreadManager):
+    def __init__(self, peer: "Peer", loop_delay: int = 60, logger=getLogger()):
+        super().__init__(loopDelay=loop_delay, logger=logger)
         self.peer = peer
         self._register_handler()
         self._register_command()
 
         self._devices = {}
         self._snmp_engine = SnmpEngine()
-        # self.trap_server = TrapServer()
+        self.trap_server = TrapServer()
 
     def start(self):
-        self.started.set()
-        super(DeviceManager, self).start()
-        # self.trap_server.start()    # L18
+        super().start()
+        self.trap_server.start()
 
     def stop(self):
-        self.stopped.set()
-        self.started.clear()
-        # self.trap_server.stop()     # L18
+        super().stop()
+        self.trap_server.stop()
 
     def run(self):
-        while self.stopped.wait(self.loop_delay) is False:
+        while self.stopped.wait(self.loopDelay) is False:
             pass
 
     def add_device(self, name, device):
-        if type(device) is Device and name not in self._devices:
+        if type(device) is DeviceABC and name not in self._devices:
             self._devices[name] = device
 
     def _register_handler(self):

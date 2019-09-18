@@ -1,8 +1,8 @@
 from atomic_p2p.utils.command import Command
 
-from ..entity import Device
+from yunnms.device.entity.cisco import CiscoSwitch
+
 from ..connection import SNMPv3Connection as SNMPv3
-from ..entity import CiscoSwitchDevice
 
 from .connection import ConnectionCmd
 
@@ -78,18 +78,18 @@ class NewCmd(Command):
             return "{} already exists".format(device_name)
 
         snmpv3 = SNMPv3(
-            snmpEngine=self.device_manager._snmp_engine,
-            authentication={
-                "host": (msg_arr[2], 161),
-                "account": msg_arr[3],
-                "authProtocol": msg_arr[4],
-                "authPassword": msg_arr[5],
-                "privProtocol": msg_arr[6],
-                "privPassword": msg_arr[7],
-            },
+            snmpEngine=self.device_manager._snmp_engine, host=(msg_arr[2], 161)
+        )
+        snmpv3.authentication_register(
+            snmp_engine=self.device_manager._snmp_engine,
+            user_name=msg_arr[3],
+            auth_protocol=msg_arr[4],
+            priv_protocol=msg_arr[6],
+            auth_key=msg_arr[5],
+            priv_key=msg_arr[7],
         )
         if device_type == "CiscoSwitch":
-            added_device = CiscoSwitchDevice(name=device_name, snmp_conn=snmpv3)
+            added_device = CiscoSwitch.snmp_polling(ip=msg_arr[2], snmp_conn=snmpv3)
             self.device_manager.add_device(device_name, added_device)
             return "{} added.".format(str(added_device))
         return "Added failed with device type {}.".format(device_type)

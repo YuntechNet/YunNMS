@@ -1,18 +1,18 @@
 from typing import List
 
+from yunnms.device.abc import DeviceABC
 from yunnms.device.entity import SystemInfo
 from yunnms.device.entity.device_type import DeviceType
-from yunnms.device.entity.device_v2 import Device
 from yunnms.device.entity import Interface
 
 
-class UnixHost(Device):
+class UnixHost(DeviceABC):
     @staticmethod
-    def polling(ip: str, snmp_conn: "SNMPv3Connection") -> "UnixHost":
+    def snmp_polling(ip: str, snmp_conn: "SNMPConnectionABC") -> "UnixHost":
         return UnixHost(
             ip=ip,
-            system_info=SystemInfo.polling(snmp_conn=snmp_conn),
-            interfaces=Interface.polling(snmp_conn=snmp_conn),
+            system_info=SystemInfo.snmp_polling(snmp_conn=snmp_conn),
+            interfaces=Interface.snmp_polling(snmp_conn=snmp_conn),
         )
 
     def __init__(

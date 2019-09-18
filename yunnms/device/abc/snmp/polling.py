@@ -1,7 +1,7 @@
 from abc import ABC, abstractstaticmethod
 
 
-class SNMPv3PollingAbc(ABC):
+class SNMPPollingABC(ABC):
     @abstractstaticmethod
-    def polling(snmp_conn: "SNMPv3Connection"):
+    def snmp_polling(snmp_conn: "SNMPConnectionABC"):
         pass

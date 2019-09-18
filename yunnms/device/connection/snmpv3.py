@@ -8,6 +8,7 @@ from pysnmp.hlapi import (
     usmNoPrivProtocol,
     UdpTransportTarget,
     ContextData,
+    setCmd,
     getCmd,
     nextCmd,
     bulkCmd,
@@ -16,20 +17,11 @@ from pysnmp.hlapi import (
 )
 from pysnmp.smi import rfc1902, compiler, view
 
+from yunnms.device.abc import SNMPConnectionABC
 
-class SNMPv3Connection(object):
-    def __init__(self, snmpEngine, authentication):
-        userName = authentication["account"]
-        host = authentication["host"]
-        assert type(host) == tuple
-        authProtocol = self.get_protocol(
-            auth_or_priv="AUTH", protocol_str=authentication["auth_protocol"]
-        )
-        privProtocol = self.get_protocol(
-            auth_or_priv="PRIV", protocol_str=authentication["priv_protocol"]
-        )
-        authKey = authentication["auth_password"]
-        privKey = authentication["priv_password"]
+
+class SNMPv3Connection(SNMPConnectionABC):
+    def __init__(self, snmpEngine, host):
         self._snmpEngine = snmpEngine
         self._mib_builder = self._snmpEngine.getMibBuilder()
         compiler.addMibCompiler(
@@ -44,47 +36,35 @@ class SNMPv3Connection(object):
             "CISCO-STACK-MIB",
             "CISCO-CONFIG-MAN-MIB",
             "CISCO-VTP-MIB",
+            "CISCO-PORT-SECURITY-MIB",
+            "CISCO-DHCP-SNOOPING-MIB",
+            "CISCO-CABLE-DIAG-MIB",
+            "CISCO-L2L3-INTERFACE-CONFIG-MIB",
+            "CISCO-PRIVATE-VLAN-MIB",
+            "CISCO-IPSEC-FLOW-MONITOR-MIB",
+            "CISCO-PORT-QOS-MIB",
         )
         self._mib_view_controller = view.MibViewController(self._mib_builder)
 
-        self._userData = UsmUserData(
-            userName=userName,
-            authKey=authKey,
-            authProtocol=authProtocol,
-            privKey=privKey,
-            privProtocol=privProtocol,
-        )
         self._udpTransportTarget = UdpTransportTarget(host)
         self._output = []
 
-    def get_protocol(self, auth_or_priv, protocol_str):
-        auth_or_priv = auth_or_priv.upper()
-        protocol_str = protocol_str.upper() if protocol_str else None
-        auth_protocols = {
-            "MD5": config.usmHMACMD5AuthProtocol,
-            "SHA": config.usmHMACSHAAuthProtocol,
-            "SHA224": config.usmHMAC128SHA224AuthProtocol,
-            "SHA256": config.usmHMAC192SHA256AuthProtocol,
-            "SHA384": config.usmHMAC256SHA384AuthProtocol,
-            "SHA512": config.usmHMAC384SHA512AuthProtocol,
-        }
-        priv_protocols = {
-            "DES": config.usmDESPrivProtocol,
-            "3DES": config.usm3DESEDEPrivProtocol,
-            "AES": config.usmAesCfb128Protocol,
-        }
-        if auth_or_priv == "AUTH":
-            return (
-                auth_protocols[protocol_str]
-                if protocol_str in auth_protocols
-                else config.usmNoAuthProtocol
-            )
-        else:
-            return (
-                priv_protocols[protocol_str]
-                if protocol_str in priv_protocols
-                else config.usmNoPrivProtocol
-            )
+    def authentication_register(
+        self,
+        snmp_engine,
+        user_name,
+        auth_protocol=None,
+        priv_protocol=None,
+        auth_key=None,
+        priv_key=None,
+    ):
+        self._user = UsmUserData(
+            userName=user_name,
+            authKey=auth_key,
+            privKey=priv_key,
+            authProtocol=self.auth_protocol_parse(auth_protocol=auth_protocol),
+            privProtocol=self.priv_protocol_parse(priv_protocol=priv_protocol),
+        )
 
     def __oid_init(self, oids: Tuple) -> List["ObjectType"]:
         """Build array from list of tuple which contains ObjectIdentity parameter to list of ObjectType
@@ -128,11 +108,26 @@ class SNMPv3Connection(object):
                         items[obj[0]] = obj[1]
                     result.append(items)
                 else:
-                    raise RuntimeError("Got SNMP error: {0}".format(error_indication))
+                    raise RuntimeError(
+                        "Got SNMP error: {0} {1}".format(error_indication, error_status)
+                    )
             except StopIteration:
                 break
             count -= 1
         return result
+
+    def set(self, oid: Tuple, **options) -> Dict:
+        if type(oid) is not tuple:
+            raise ValueError("parameter oid should be tuple.")
+        query = setCmd(
+            self._snmpEngine,
+            self._user,
+            self._udpTransportTarget,
+            ContextData(),
+            ObjectType(ObjectIdentity(*oid[0]), oid[1]),
+            **options
+        )
+        return self.__handle_result(query=query, count=1)[0]
 
     def get(self, oid: Tuple, **options) -> Dict:
         """GET snmp query
@@ -151,7 +146,7 @@ class SNMPv3Connection(object):
             raise ValueError("parameter oid should be tuple.")
         query = getCmd(
             self._snmpEngine,
-            self._userData,
+            self._user,
             self._udpTransportTarget,
             ContextData(),
             *self.__oid_init(oids=[oid]),
@@ -183,7 +178,7 @@ class SNMPv3Connection(object):
 
         query = nextCmd(
             self._snmpEngine,
-            self._userData,
+            self._user,
             self._udpTransportTarget,
             ContextData(),
             *self.__oid_init(oids=oids),
@@ -191,7 +186,8 @@ class SNMPv3Connection(object):
             **options
         )
 
-        return self.__handle_result(query=query, count=len(oids))[0]
+        result = self.__handle_result(query=query, count=len(oids))
+        return result[0] if len(result) > 0 else result
 
     def bulk(
         self, oids: List[Tuple], count: int, start_from: int = 0, **options
@@ -218,7 +214,7 @@ class SNMPv3Connection(object):
 
         query = bulkCmd(
             self._snmpEngine,
-            self._userData,
+            self._user,
             self._udpTransportTarget,
             ContextData(),
             start_from,

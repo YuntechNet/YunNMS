@@ -2,7 +2,6 @@ import pytest
 
 from pysnmp.hlapi import SnmpEngine
 
-from yunnms.device.entity import Interface, DeviceInfo
 from yunnms.device.connection import SSHConnection, TelnetConnection, SNMPv3Connection
 
 
@@ -34,11 +33,7 @@ def telnet():
 
 @pytest.fixture(scope='module')
 def snmp_v3():
-    return SNMPv3Connection(snmpEngine=SnmpEngine(), authentication={
-        "account": "TestLinux",
-        "host": ("127.0.0.1", 161),
-        "auth_protocol": "SHA",
-        "auth_password": "TestAuth",
-        "priv_protocol": "DES",
-        "priv_password": "TestAuth",
-    })
+    snmp_engine = SnmpEngine()
+    conn = SNMPv3Connection(snmpEngine=snmp_engine, host=("127.0.0.1", 161))
+    conn.authentication_register(snmp_engine=snmp_engine, user_name="TestLinux", auth_protocol="SHA", priv_protocol="DES", auth_key="TestAuth", priv_key="TestAuth")
+    return conn

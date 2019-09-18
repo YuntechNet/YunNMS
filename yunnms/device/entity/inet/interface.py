@@ -1,12 +1,12 @@
 from re import compile as re_compile
 from pysnmp.hlapi import ObjectType, ObjectIdentity
 
-from yunnms.device.abc import SNMPv3PollingAbc
+from yunnms.device.abc import SNMPPollingABC
 
 
-class Interface(SNMPv3PollingAbc):
+class Interface(SNMPPollingABC):
     @staticmethod
-    def polling(snmp_conn: "SNMPv3Connection") -> "Interface":
+    def snmp_polling(snmp_conn: "SNMPConnectionABC") -> "Interface":
         interfaces = []
         prekey = "IF-MIB::"
         for each in snmp_conn.bulk_by(
@@ -17,7 +17,7 @@ class Interface(SNMPv3PollingAbc):
                 ("IF-MIB", "ifMtu"),
                 ("IF-MIB", "ifSpeed"),
                 ("IF-MIB", "ifPhysAddress"),
-                ("IF-MIB", "ifAdminStatus"),
+                ("IF-MIB", "ifOperStatus"),
             ],
             count_oid=("IF-MIB", "ifNumber", 0),
         ):
@@ -28,7 +28,7 @@ class Interface(SNMPv3PollingAbc):
                     int_type=each[prekey + "ifType." + index],
                     mtu=int(each[prekey + "ifMtu." + index]),
                     speed=int(each[prekey + "ifSpeed." + index]),
-                    status=each[prekey + "ifAdminStatus." + index],
+                    status=each[prekey + "ifOperStatus." + index],
                     description=each[prekey + "ifDescr." + index],
                     phisical_address=each[prekey + "ifPhysAddress." + index],
                 )
@@ -54,7 +54,9 @@ class Interface(SNMPv3PollingAbc):
         self.phisical_address = phisical_address
 
     def __str__(self) -> str:
-        return "Interface<NAME={}, STA: {}, PH_ADDR={}>".format(self.name, self.status, self.phisical_address)
+        return "Interface<NAME={}, STA: {}, PH_ADDR={}>".format(
+            self.name, self.status, self.phisical_address
+        )
 
     def __repr__(self) -> str:
         return self.__str__()

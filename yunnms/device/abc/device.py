@@ -1,13 +1,14 @@
 from typing import List
 from abc import ABC, abstractmethod
 
-from .inet import Interface
-from yunnms.device.entity import SystemInfo
 
-
-class Device(ABC):
+class DeviceABC(ABC):
     def __init__(
-        self, ip: str, device_type: "DeviceType", system_info: "SystemInfo", interfaces: List["Interface"]
+        self,
+        ip: str,
+        device_type: "DeviceType",
+        system_info: "SystemInfo",
+        interfaces: List["Interface"],
     ) -> None:
         self.ip = ip
         self.device_type = device_type
