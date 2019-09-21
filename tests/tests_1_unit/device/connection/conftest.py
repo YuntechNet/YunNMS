@@ -33,7 +33,6 @@ def telnet():
 
 @pytest.fixture(scope='module')
 def snmp_v3():
-    snmp_engine = SnmpEngine()
-    conn = SNMPv3Connection(snmpEngine=snmp_engine, host=("127.0.0.1", 161))
-    conn.authentication_register(snmp_engine=snmp_engine, user_name="TestLinux", auth_protocol="SHA", priv_protocol="DES", auth_key="TestAuth", priv_key="TestAuth")
+    conn = SNMPv3Connection(snmpEngine=SnmpEngine(), host=("127.0.0.1", 161))
+    conn.authentication_register(user_name="TestLinux", auth_protocol="SHA", priv_protocol="DES", auth_key="TestAuth", priv_key="TestAuth")
     return conn

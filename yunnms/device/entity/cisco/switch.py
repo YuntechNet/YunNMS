@@ -9,12 +9,12 @@ from .switch_system_info import CiscoSwitchSystemInfo
 
 class CiscoSwitch(DeviceABC, SNMPPollingABC):
     @staticmethod
-    def snmp_polling(ip: str, snmp_conn: "SNMPConnectionABC") -> "CiscoSwitch":
+    def new(ip: str, snmp_conn: "SNMPConnectionABC") -> "CiscoSwitch":
         return CiscoSwitch(
             ip=ip,
             snmp_conn=snmp_conn,
-            system_info=CiscoSwitchSystemInfo.snmp_polling(snmp_conn=snmp_conn),
-            interfaces=Interface.snmp_polling(snmp_conn=snmp_conn),
+            system_info=CiscoSwitchSystemInfo.new(snmp_conn=snmp_conn),
+            interfaces=Interface.new(snmp_conn=snmp_conn),
         )
 
     def __init__(
@@ -32,5 +32,11 @@ class CiscoSwitch(DeviceABC, SNMPPollingABC):
         )
         self.snmp_conn = snmp_conn
 
+    def snmp_polling(self, snmp_conn: "SNMPConnectionABC") -> None:
+        self.system_info.snmp_polling(snmp_conn=self.snmp_conn)
+        # Not polling each Interface.
+        # for each in self.interfaces:
+        #     each.snmp_polling(snmp_conn=self.snmp_conn)
+
     def update(self) -> None:
-        pass
+        self.snmp_polling(snmp_conn=self.snmp_conn)

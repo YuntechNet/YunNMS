@@ -16,7 +16,7 @@ class DeviceManager(ThreadManager):
     def __init__(
         self,
         peer: "Peer",
-        trap_host: Tuple[str, int] = None,
+        trap_host: Tuple[str, int] = ("0.0.0.0", 162),
         loop_delay: int = 60,
         logger=getLogger(),
     ):
@@ -39,10 +39,11 @@ class DeviceManager(ThreadManager):
 
     def run(self):
         while self.stopped.wait(self.loopDelay) is False:
-            pass
+            for (_, device) in self._devices.items():
+                device.update()
 
     def add_device(self, name, device):
-        if type(device) is DeviceABC and name not in self._devices:
+        if isinstance(device, DeviceABC) and name not in self._devices:
             self._devices[name] = device
 
     def _register_handler(self):

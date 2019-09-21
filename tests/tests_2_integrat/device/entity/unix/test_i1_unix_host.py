@@ -1,5 +1,14 @@
 from yunnms.device.entity.unix import UnixHost
 
 
-def test_snmp_polling(unix_snmp):
-    assert UnixHost.snmp_polling(ip="127.0.0.1", snmp_conn=unix_snmp) is not None
+def test_new(unix_snmp):
+    uh = UnixHost.new(ip="127.0.0.1", snmp_conn=unix_snmp)
+    assert uh.ip == "127.0.0.1"
+    assert uh.system_info is not None
+    assert uh.interfaces != []
+
+
+def snmp_polling(unix_host):
+    unix_host.snmp_polling(snmp_conn=unix_host.snmp_conn)
+    assert unix_host.system_info is not None
+    assert unix_host.interfaces != []

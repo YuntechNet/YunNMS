@@ -81,7 +81,6 @@ class NewCmd(Command):
             snmpEngine=self.device_manager._snmp_engine, host=(msg_arr[2], 161)
         )
         snmpv3.authentication_register(
-            snmp_engine=self.device_manager._snmp_engine,
             user_name=msg_arr[3],
             auth_protocol=msg_arr[4],
             priv_protocol=msg_arr[6],
@@ -89,7 +88,7 @@ class NewCmd(Command):
             priv_key=msg_arr[7],
         )
         if device_type == "CiscoSwitch":
-            added_device = CiscoSwitch.snmp_polling(ip=msg_arr[2], snmp_conn=snmpv3)
+            added_device = CiscoSwitch.new(ip=msg_arr[2], snmp_conn=snmpv3)
             self.device_manager.add_device(device_name, added_device)
             return "{} added.".format(str(added_device))
         return "Added failed with device type {}.".format(device_type)

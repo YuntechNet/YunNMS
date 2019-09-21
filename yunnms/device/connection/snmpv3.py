@@ -51,7 +51,6 @@ class SNMPv3Connection(SNMPConnectionABC):
 
     def authentication_register(
         self,
-        snmp_engine,
         user_name,
         auth_protocol=None,
         priv_protocol=None,
