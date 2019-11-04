@@ -9,11 +9,13 @@ from pysnmp.proto.api import v2c
 from pysnmp.smi import rfc1902, compiler, view
 
 from atomic_p2p.utils.manager import ThreadManager
+from yunnms.utils import Singleton
 
 
+@Singleton
 class TrapServer(ThreadManager):
     def __init__(self, host: Tuple[str, int] = ("0.0.0.0", 162), logger=getLogger()):
-        super(TrapServer, self).__init__(logger=logger)
+        super().__init__(logger=logger)
         self._host = host
         self._pdu_count = 1
         self._snmp_engine = SnmpEngine()

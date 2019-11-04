@@ -1,13 +1,13 @@
 from typing import Union, List, Dict
 
-from yunnms.device.abc import SNMPPollingABC
+from yunnms.device.abc import SNMPPollABC
 
 
-class SystemInfo(SNMPPollingABC):
+class SystemInfo(SNMPPollABC):
     @staticmethod
     def new(snmp_conn: "SNMPConnectionABC") -> "SystemInfo":
-        system_info = SystemInfo(None, None, 100, 100)
-        system_info.snmp_polling(snmp_conn=snmp_conn)
+        system_info = SystemInfo(None, None, 0.0, 0.0)
+        system_info.poll_update(snmp_conn=snmp_conn)
         return system_info
 
     def __init__(
@@ -18,7 +18,7 @@ class SystemInfo(SNMPPollingABC):
         self.cpu_usage = cpu_usage
         self.memory_usage = memory_usage
 
-    def snmp_polling(self, snmp_conn: "SNMPConnectionABC") -> Union[List, Dict]:
+    def snmp_poll(self, snmp_conn: "SNMPConnectionABC") -> List[object]:
         output = snmp_conn.next(
             oids=[
                 # System
@@ -31,13 +31,25 @@ class SystemInfo(SNMPPollingABC):
                 ("UCD-SNMP-MIB", "memAvailReal"),
             ]
         )
-        self.name = output["SNMPv2-MIB::sysName.0"]
-        self.description = output["SNMPv2-MIB::sysDescr.0"]
-        self.cpu_usage = int(output["UCD-SNMP-MIB::ssCpuSystem.0"]) / 100
-        self.memory_usage = 1 - (
-            int(output["UCD-SNMP-MIB::memAvailReal.0"])
-            / int(output["UCD-SNMP-MIB::memTotalReal.0"])
+        return [
+            output["SNMPv2-MIB::sysName.0"],
+            output["SNMPv2-MIB::sysDescr.0"],
+            int(output["UCD-SNMP-MIB::ssCpuSystem.0"]) / 100,
+            1
+            - (
+                int(output["UCD-SNMP-MIB::memAvailReal.0"])
+                / int(output["UCD-SNMP-MIB::memTotalReal.0"])
+            ),
+        ]
+
+    def poll_update(self, snmp_conn: "SNMPConnectionABC") -> None:
+        name, description, cpu_usage, memory_usage = self.snmp_poll(
+            snmp_conn=snmp_conn
         )
+        self.name = name
+        self.description = description
+        self.cpu_usage = cpu_usage
+        self.memory_usage = memory_usage
 
     def __str__(self) -> str:
         return "{}<CPU_USE: {:2.02f}%, MEM_USE: {:2.02f}%>".format(

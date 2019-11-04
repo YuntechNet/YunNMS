@@ -1,5 +1,7 @@
 from .connection import SNMPConnectionABC
-from .polling import SNMPPollingABC
+from .poll import SNMPPollABC
 
-
-__all__ = ["SNMPConnectionABC", "SNMPPollingABC"]
+__all__ = [
+    "SNMPConnectionABC",
+    "SNMPPollABC",
+]

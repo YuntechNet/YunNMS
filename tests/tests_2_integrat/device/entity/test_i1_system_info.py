@@ -7,7 +7,7 @@ def test_new(unix_snmp):
     assert si.description is not None
 
 
-def test_snmp_polling(unix_snmp, system_info):
-    system_info.snmp_polling(snmp_conn=unix_snmp)
+def test_snmp_poll(unix_snmp, system_info):
+    system_info.snmp_poll(snmp_conn=unix_snmp)
     assert system_info.name is not None
     assert system_info.description is not None

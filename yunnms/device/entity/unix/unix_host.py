@@ -1,19 +1,19 @@
 from typing import List
 
-from yunnms.device.abc import DeviceABC, SNMPPollingABC
+from yunnms.device.abc import DeviceABC, SNMPPollABC
 from yunnms.device.entity import SystemInfo
 from yunnms.device.entity.device_type import DeviceType
 from yunnms.device.entity import Interface
 
 
-class UnixHost(DeviceABC, SNMPPollingABC):
+class UnixHost(DeviceABC, SNMPPollABC):
     @staticmethod
     def new(ip: str, snmp_conn: "SNMPConnectionABC") -> "UnixHost":
         return UnixHost(
             ip=ip,
             snmp_conn=snmp_conn,
             system_info=SystemInfo.new(snmp_conn=snmp_conn),
-            interfaces=Interface.new(snmp_conn=snmp_conn),
+            interfaces=Interface.new_interfaces(snmp_conn=snmp_conn),
         )
 
     def __init__(
@@ -31,12 +31,16 @@ class UnixHost(DeviceABC, SNMPPollingABC):
         )
         self.snmp_conn = snmp_conn
 
-    def snmp_polling(self, snmp_conn: "SNMPConnectionABC") -> None:
-        self.system_info.snmp_polling(snmp_conn=self.snmp_conn)
-        # Not polling each Interface.
-        # for each in self.interfaces:
-        #     each.snmp_polling(snmp_conn=self.snmp_conn)
+    def snmp_poll(self, snmp_conn: "SNMPConnectionABC") -> List[object]:
+        return [
+            self.system_info.snmp_poll(snmp_conn=self.snmp_conn),
+            [each.snmp_poll(snmp_conn=self.snmp_conn) for each in self.interfaces],
+        ]
 
+    def poll_update(self, snmp_conn: "SNMPConnectionABC") -> None:
+        self.system_info.poll_update(snmp_conn=snmp_conn)
+        for each in self.interfaces:
+            each.poll_update(snmp_conn=snmp_conn)
 
     def update(self) -> None:
-        self.snmp_polling(snmp_conn=self.snmp_conn)
+        self.snmp_poll(snmp_conn=self.snmp_conn)

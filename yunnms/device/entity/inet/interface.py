@@ -1,14 +1,14 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 from re import compile as re_compile
 
 from pysnmp.hlapi import ObjectType, ObjectIdentity
 
-from yunnms.device.abc import SNMPPollingABC
+from yunnms.device.abc import SNMPPollABC
 
 
-class Interface(SNMPPollingABC):
+class Interface(SNMPPollABC):
     @staticmethod
-    def snmp_pollings(snmp_conn: "SNMPConnectionABC") -> List[Dict]:
+    def snmp_polls(snmp_conn: "SNMPConnectionABC") -> List[Dict]:
         return snmp_conn.bulk_by(
             oids=[
                 ("IF-MIB", "ifIndex"),
@@ -24,10 +24,10 @@ class Interface(SNMPPollingABC):
         )
 
     @staticmethod
-    def new(snmp_conn: "SNMPConnectionABC") -> List["Interface"]:
+    def new_interfaces(snmp_conn: "SNMPConnectionABC") -> List["Interface"]:
         interfaces = []
         prekey = "IF-MIB::"
-        for each in Interface.snmp_pollings(snmp_conn=snmp_conn):
+        for each in Interface.snmp_polls(snmp_conn=snmp_conn):
             index = list(each.keys())[0].split(".")[1]
             interfaces.append(
                 Interface(
@@ -44,6 +44,12 @@ class Interface(SNMPPollingABC):
                 )
             )
         return interfaces
+
+    @staticmethod
+    def new(snmp_conn: "SNMPConnectionABC", index: int) -> "Interface":
+        interface = Interface(None, None, 0, 0, None)
+        interface.poll_update(snmp_conn)
+        return interface
 
     def __init__(
         self,
@@ -65,7 +71,7 @@ class Interface(SNMPPollingABC):
         self.phisical_address = phisical_address
         self.snmp_index = snmp_index
 
-    def snmp_polling(self, snmp_conn: "SNMPConnectionABC") -> None:
+    def snmp_poll(self, snmp_conn: "SNMPConnectionABC") -> Union[List, Dict]:
         def get_g(index):
             output = {}
             for each in [
@@ -80,21 +86,32 @@ class Interface(SNMPPollingABC):
                 output.update(snmp_conn.get(oid=each))
             return output
 
-        index = str(self.snmp_index)
-        output = get_g(index=index)
+        output = get_g(index=self.snmp_index)
         key = "IF-MIB::"
-        self.name = output[key + "ifName." + index]
-        self.description = output[key + "ifDescr." + index]
-        self.int_type = output[key + "ifType." + index]
-        self.mtu = (
+        return [
+            output[key + "ifName." + self.snmp_index],
+            output[key + "ifDescr." + self.snmp_index],
+            output[key + "ifType." + self.snmp_index],
             0
-            if output[key + "ifMtu." + index]
+            if output[key + "ifMtu." + self.snmp_index]
             == "No Such Instance currently exists at this OID"
-            else int(output[key + "ifMtu." + index])
+            else int(output[key + "ifMtu." + self.snmp_index]),
+            int(output[key + "ifSpeed." + self.snmp_index]),
+            output[key + "ifPhysAddress." + self.snmp_index],
+            output[key + "ifOperStatus." + self.snmp_index],
+        ]
+
+    def poll_update(self, snmp_conn: "SNMPConnectionABC") -> None:
+        name, description, int_type, mtu, speed, phisical_address, status = self.snmp_poll(
+            snmp_conn
         )
-        self.speed = int(output[key + "ifSpeed." + index])
-        self.phisical_address = output[key + "ifPhysAddress." + index]
-        self.status = output[key + "ifOperStatus." + index]
+        self.name = name
+        self.description = description
+        self.int_type = int_type
+        self.mtu = mtu
+        self.speed = speed
+        self.phisical_address = phisical_address
+        self.status = status
 
     def __str__(self) -> str:
         return "Interface<NAME={}, STA: {}, PH_ADDR={}>".format(

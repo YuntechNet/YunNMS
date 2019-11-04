@@ -4,3 +4,4 @@ omit =
     36venv/*
     tests/*
     setup.py
+    test_*.py

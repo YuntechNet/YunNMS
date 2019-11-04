@@ -8,7 +8,7 @@ def test_new(unix_snmp):
     assert uh.interfaces != []
 
 
-def snmp_polling(unix_host):
-    unix_host.snmp_polling(snmp_conn=unix_host.snmp_conn)
+def snmp_poll(unix_host):
+    unix_host.snmp_poll(snmp_conn=unix_host.snmp_conn)
     assert unix_host.system_info is not None
     assert unix_host.interfaces != []

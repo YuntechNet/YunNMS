@@ -9,7 +9,7 @@ from yunnms.role import Role
 from yunnms.device.abc import DeviceABC
 from .communication import SyncHandler
 from .command import HelpCmd, RemoveCmd, ListCmd, NewCmd, ConnectionCmd
-from .snmp import TrapServer
+from .entity.trap_server import TrapServer
 
 
 class DeviceManager(ThreadManager):
