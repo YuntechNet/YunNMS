@@ -1,4 +1,4 @@
 from .device import DeviceABC
-from .snmp import SNMPConnectionABC, SNMPPollABC
+from .snmp import SNMPConnectionABC, SNMPPollABC, SNMPTrapABC
 
-__all__ = ["DeviceABC", "SNMPConnectionABC", "SNMPPollABC"]
+__all__ = ["DeviceABC", "SNMPConnectionABC", "SNMPPollABC", "SNMPTrapABC"]

@@ -1,13 +1,13 @@
-from typing import List
+from typing import List, Dict
 
-from yunnms.device.abc import DeviceABC, SNMPPollABC
+from yunnms.device.abc import DeviceABC, SNMPPollABC, SNMPTrapABC
 from yunnms.device.entity.device_type import DeviceType
 from yunnms.device.entity.inet import Interface
 
 from .switch_system_info import CiscoSwitchSystemInfo
 
 
-class CiscoSwitch(DeviceABC, SNMPPollABC):
+class CiscoSwitch(DeviceABC, SNMPPollABC, SNMPTrapABC):
     @staticmethod
     def new(ip: str, snmp_conn: "SNMPConnectionABC") -> "CiscoSwitch":
         return CiscoSwitch(
@@ -42,6 +42,14 @@ class CiscoSwitch(DeviceABC, SNMPPollABC):
         self.system_info.poll_update(snmp_conn=snmp_conn)
         for each in self.interfaces:
             each.poll_update(snmp_conn=snmp_conn)
+
+    def is_trap_match(self, context: Dict, result: Dict[str, str]) -> bool:
+        return context["transportAddress"][0] == self.snmp_conn.host[0]
+
+    def trap_update(self, context, result) -> None:
+        for each in self.interfaces:
+            if each.is_trap_match(context, result) is True:
+                return each.trap_update(context=context, result=result)
 
     def update(self) -> None:
         self.snmp_poll(snmp_conn=self.snmp_conn)

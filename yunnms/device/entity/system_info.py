@@ -43,9 +43,7 @@ class SystemInfo(SNMPPollABC):
         ]
 
     def poll_update(self, snmp_conn: "SNMPConnectionABC") -> None:
-        name, description, cpu_usage, memory_usage = self.snmp_poll(
-            snmp_conn=snmp_conn
-        )
+        name, description, cpu_usage, memory_usage = self.snmp_poll(snmp_conn=snmp_conn)
         self.name = name
         self.description = description
         self.cpu_usage = cpu_usage

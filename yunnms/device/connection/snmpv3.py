@@ -21,8 +21,13 @@ from yunnms.device.abc import SNMPConnectionABC
 
 
 class SNMPv3Connection(SNMPConnectionABC):
-    def __init__(self, snmpEngine, host):
+    @property
+    def host(self):
+        return self._host
+
+    def __init__(self, snmpEngine: "SnmpEngine", host: Tuple[str, int]) -> None:
         self._snmpEngine = snmpEngine
+        self._host = host
         self._mib_builder = self._snmpEngine.getMibBuilder()
         compiler.addMibCompiler(
             mibBuilder=self._mib_builder,
@@ -46,23 +51,16 @@ class SNMPv3Connection(SNMPConnectionABC):
         )
         self._mib_view_controller = view.MibViewController(self._mib_builder)
 
-        self._udpTransportTarget = UdpTransportTarget(host)
+        self._udpTransportTarget = UdpTransportTarget(self._host)
         self._output = []
 
-    def authentication_register(
-        self,
-        user_name,
-        auth_protocol=None,
-        priv_protocol=None,
-        auth_key=None,
-        priv_key=None,
-    ):
+    def authentication_register(self, authentication: Dict) -> None:
         self._user = UsmUserData(
-            userName=user_name,
-            authKey=auth_key,
-            privKey=priv_key,
-            authProtocol=self.auth_protocol_parse(auth_protocol=auth_protocol),
-            privProtocol=self.priv_protocol_parse(priv_protocol=priv_protocol),
+            userName=authentication["user_name"],
+            authKey=authentication["auth_key"],
+            privKey=authentication["priv_key"],
+            authProtocol=authentication["auth_protocol"],
+            privProtocol=authentication["priv_protocol"],
         )
 
     def __oid_init(self, oids: Tuple) -> List["ObjectType"]:

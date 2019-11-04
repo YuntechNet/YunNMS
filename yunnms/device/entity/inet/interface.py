@@ -1,12 +1,13 @@
 from typing import List, Dict, Union
+from logging import getLogger
 from re import compile as re_compile
 
 from pysnmp.hlapi import ObjectType, ObjectIdentity
 
-from yunnms.device.abc import SNMPPollABC
+from yunnms.device.abc import SNMPPollABC, SNMPTrapABC
 
 
-class Interface(SNMPPollABC):
+class Interface(SNMPPollABC, SNMPTrapABC):
     @staticmethod
     def snmp_polls(snmp_conn: "SNMPConnectionABC") -> List[Dict]:
         return snmp_conn.bulk_by(
@@ -112,6 +113,21 @@ class Interface(SNMPPollABC):
         self.speed = speed
         self.phisical_address = phisical_address
         self.status = status
+
+    def is_trap_match(self, context: Dict, result: Dict[str, str]) -> bool:
+        return (
+            result["SNMPv2-MIB::snmpTrapOID.0"]
+            in ["IF-MIB::linkUp", "IF-MIB::linkDown"]
+            and ("IF-MIB::ifIndex." + self.snmp_index) in result
+        )
+
+    def trap_update(self, context, result) -> None:
+        if result["SNMPv2-MIB::snmpTrapOID.0"] == "IF-MIB::linkUp":
+            getLogger().info("{} status to up.".format(self))
+            self.status = "Up"
+        elif result["SNMPv2-MIB::snmpTrapOID.0"] == "IF-MIB::linkDown":
+            getLogger().info("{} status to down.".format(self))
+            self.status = "Down"
 
     def __str__(self) -> str:
         return "Interface<NAME={}, STA: {}, PH_ADDR={}>".format(
