@@ -1,5 +1,4 @@
 from .system_info import SystemInfo
-from .inet import Interface
-from .enums import SpeedRate
+from .inet import Interface, SpeedRate
 
 __all__ = ["SystemInfo", "SpeedRate", "Interface"]

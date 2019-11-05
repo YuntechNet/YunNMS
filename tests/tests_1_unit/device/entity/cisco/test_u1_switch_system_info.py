@@ -1,6 +1,21 @@
-from yunnms.device.entity.cisco import CiscoSwitchSystemInfo
 
 
-def test_str():
-    csi = CiscoSwitchSystemInfo(name="name", description="description", cpu_5min=0, cpu_1min=0, cpu_5sec=5, memory_free=10, memory_used=10)
-    assert str(csi) == "CiscoSwitchSystemInfo<CPU_USE: {:2.02f}%, MEM_USE: {:2.02f}%>".format(0, 10 / (10 + 10) * 100)
+
+def test_calculate(cisco_system_info):
+    cpu = 60 # 60%
+    memory = 70 # 70%
+    free = 30
+    used = 70
+    cisco_system_info.cpu_5min = cpu
+    cisco_system_info.memory_used = used
+    cisco_system_info.memory_free = free
+    assert cisco_system_info.cpu_usage != cpu
+    assert cisco_system_info.memory_usage != memory
+    cisco_system_info.calculate()
+    assert cisco_system_info.cpu_usage == cpu
+    assert cisco_system_info.memory_usage == memory
+
+
+def test_str(cisco_system_info):
+    assert str(cisco_system_info) == "CiscoSwitchSystemInfo<CPU_USE: {:2.02f}%, MEM_USE: {:2.02f}%>".format(
+        0, 10 / (10 + 10) * 100)

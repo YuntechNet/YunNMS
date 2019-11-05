@@ -2,7 +2,7 @@ from logging import getLogger, basicConfig, DEBUG, Formatter, StreamHandler
 from logging.handlers import TimedRotatingFileHandler
 
 from pysnmp.entity import config
-from yunnms.device.entity.trap_server import TrapServer
+from yunnms.device.trap_server import TrapServer
 
 
 log_format = '%(asctime)s : %(levelname)s : %(name)s : %(message)s'
@@ -25,6 +25,7 @@ ts = TrapServer(logger=logger)
 
 authentications = [
     ("TestUser", "8000000903002C3F38E01D01"),
+    ("TestUser", "800000d30300000e112245"),
 ]
 
 for (user_name, engine_id) in authentications:
@@ -35,8 +36,8 @@ for (user_name, engine_id) in authentications:
         priv_protocol = config.usmDESPrivProtocol
         priv_key = "TestAuth"
 
-    ts.addUser(authentication={
-        'userName': user_name,
+    ts.add_user(authentication={
+        'user_name': user_name,
         'auth_protocol': config.usmHMACSHAAuthProtocol,
         'auth_key': 'TestAuth',
         'priv_protocol': priv_protocol,

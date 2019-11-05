@@ -5,7 +5,7 @@ from yunnms.device.abc import SNMPPollABC
 
 class SystemInfo(SNMPPollABC):
     @staticmethod
-    def new(snmp_conn: "SNMPConnectionABC") -> "SystemInfo":
+    def new(snmp_conn: "SNMPConnectionABC", *args, **kwargs) -> "SystemInfo":
         system_info = SystemInfo(None, None, 0.0, 0.0)
         system_info.poll_update(snmp_conn=snmp_conn)
         return system_info
@@ -18,7 +18,9 @@ class SystemInfo(SNMPPollABC):
         self.cpu_usage = cpu_usage
         self.memory_usage = memory_usage
 
-    def snmp_poll(self, snmp_conn: "SNMPConnectionABC") -> List[object]:
+    def snmp_poll(
+        self, snmp_conn: "SNMPConnectionABC", *args, **kwargs
+    ) -> List[object]:
         output = snmp_conn.next(
             oids=[
                 # System
@@ -42,7 +44,7 @@ class SystemInfo(SNMPPollABC):
             ),
         ]
 
-    def poll_update(self, snmp_conn: "SNMPConnectionABC") -> None:
+    def poll_update(self, snmp_conn: "SNMPConnectionABC", *args, **kwargs) -> None:
         name, description, cpu_usage, memory_usage = self.snmp_poll(snmp_conn=snmp_conn)
         self.name = name
         self.description = description

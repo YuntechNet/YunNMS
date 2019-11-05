@@ -118,10 +118,10 @@ class Interface(SNMPPollABC, SNMPTrapABC):
         return (
             result["SNMPv2-MIB::snmpTrapOID.0"]
             in ["IF-MIB::linkUp", "IF-MIB::linkDown"]
-            and ("IF-MIB::ifIndex." + self.snmp_index) in result
+            and ("IF-MIB::ifIndex.{}".format(self.snmp_index)) in result
         )
 
-    def trap_update(self, context, result) -> None:
+    def trap_update(self, context: Dict, result: Dict) -> None:
         if result["SNMPv2-MIB::snmpTrapOID.0"] == "IF-MIB::linkUp":
             getLogger().info("{} status to up.".format(self))
             self.status = "Up"

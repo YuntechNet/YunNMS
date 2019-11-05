@@ -43,11 +43,11 @@ class UnixHost(DeviceABC, SNMPPollABC, SNMPTrapABC):
             each.poll_update(snmp_conn=snmp_conn)
 
     def is_trap_match(self, context: Dict, result: Dict[str, str]) -> bool:
-        return context["transportAddress"][0] == self.snmp_conn.host[0]
+        return context["transportAddress"][0] == self.ip
 
-    def trap_update(self, context, result) -> None:
+    def trap_update(self, context: Dict, result: Dict) -> None:
         for each in self.interfaces:
-            if each.is_trap_match(context, result) is True:
+            if each.is_trap_match(context=context, result=result) is True:
                 return each.trap_update(context=context, result=result)
 
     def update(self) -> None:
