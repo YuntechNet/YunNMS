@@ -1,4 +1,4 @@
+from .device_type import DeviceType
 from .system_info import SystemInfo
-from .inet import Interface, SpeedRate
 
-__all__ = ["SystemInfo", "SpeedRate", "Interface"]
+__all__ = ["DeviceType", "SystemInfo"]

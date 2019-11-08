@@ -1,9 +1,7 @@
 from atomic_p2p.utils.command import Command
 
-from yunnms.device.entity.cisco import CiscoSwitch
-
+from ..entity.cisco.switch import CiscoSwitch
 from ..connection import SNMPv3Connection as SNMPv3
-
 from .connection import ConnectionCmd
 
 __all__ = ["HelpCmd", "ListCmd", "NewCmd", "RemoveCmd", "ConnectionCmd"]

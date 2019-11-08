@@ -1,4 +1,4 @@
-from yunnms.device.entity import Interface
+from yunnms.device.entity.inet import Interface
 
 
 def test_new_interfaces(unix_snmp):

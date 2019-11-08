@@ -9,8 +9,9 @@ from pysnmp.proto.api import v2c
 from pysnmp.smi import rfc1902, compiler, view
 
 from atomic_p2p.utils.manager import ThreadManager
-from yunnms.utils import Singleton
-from yunnms.device.abc.snmp import SNMPTrapABC
+
+from ..utils.decorator import Singleton
+from .abc.snmp import SNMPTrapABC
 
 
 @Singleton

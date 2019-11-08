@@ -1,5 +1,5 @@
 from typing import List
-from abc import ABC, abstractmethod, abstractstaticmethod
+from abc import ABC, abstractmethod
 
 
 class SNMPPollABC(ABC):
@@ -12,7 +12,6 @@ class SNMPPollABC(ABC):
         Args:
             snmp_conn: A SNMPConnection use to poll.
         """
-        pass
 
     @abstractmethod
     def poll_update(self, snmp_conn: "SNMPConnectionABC", **kwargs) -> None:
@@ -21,4 +20,3 @@ class SNMPPollABC(ABC):
         Args:
             snmp_conn: A SNMPConnection use to poll.
         """
-        pass

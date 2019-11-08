@@ -1,6 +1,5 @@
 from typing import Tuple, Dict, List, Generator
 
-from pysnmp.entity import config
 from pysnmp.hlapi import (
     SnmpEngine,
     UsmUserData,
@@ -17,7 +16,7 @@ from pysnmp.hlapi import (
 )
 from pysnmp.smi import rfc1902, compiler, view
 
-from yunnms.device.abc import SNMPConnectionABC
+from ..abc.snmp.connection import SNMPConnectionABC
 
 
 class SNMPv3Connection(SNMPConnectionABC):

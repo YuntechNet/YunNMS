@@ -1,6 +1,6 @@
-from typing import Dict, List
+from typing import List, Tuple
 
-from yunnms.device.entity import SystemInfo
+from .. import SystemInfo
 
 
 class CiscoSwitchSystemInfo(SystemInfo):
@@ -25,18 +25,19 @@ class CiscoSwitchSystemInfo(SystemInfo):
         self.cpu_5sec = cpu_5sec
         self.memory_used = memory_used
         self.memory_free = memory_free
+        cpu_usage, memory_usage = self.calculate()
         super().__init__(
             name=name,
             description=description,
-            cpu_usage=cpu_5min,
-            memory_usage=(memory_used / (memory_free + memory_used)) * 100,
+            cpu_usage=cpu_usage,
+            memory_usage=memory_usage,
         )
 
-    def calculate(self):
-        self.cpu_usage = self.cpu_5min
-        self.memory_usage = (
-            self.memory_used / (self.memory_free + self.memory_used)
-        ) * 100
+    def calculate(self) -> Tuple[float, float]:
+        return (
+            self.cpu_5min,
+            (self.memory_used / (self.memory_free + self.memory_used)) * 100,
+        )
 
     def snmp_poll(self, snmp_conn: "SNMPConnectionABC") -> List[object]:
         output = snmp_conn.next(
@@ -74,4 +75,4 @@ class CiscoSwitchSystemInfo(SystemInfo):
         self.cpu_5sec = cpu_5sec
         self.memory_used = memory_used
         self.memory_free = memory_free
-        self.calculate()
+        self.cpu_usage, self.memory_usage = self.calculate()

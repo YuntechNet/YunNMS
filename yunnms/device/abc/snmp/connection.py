@@ -1,5 +1,5 @@
 from typing import Tuple
-from abc import ABC, abstractmethod, abstractstaticmethod
+from abc import ABC, abstractmethod
 
 from pysnmp.entity import config
 

@@ -1,6 +1,3 @@
-from yunnms.device.entity import Interface
-
-
 def test_is_trap_match(interface):
     ifIndex = "IF-MIB::ifIndex.{}".format(interface.snmp_index)
     assert interface.is_trap_match(context=None, result={

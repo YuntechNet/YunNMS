@@ -19,7 +19,7 @@ def cisco_system_info():
 
 @fixture(scope="function")
 def cisco_switch():
-    return CiscoSwitch(ip="127.0.0.1", snmp_conn=None, system_info=None, interfaces=[
+    return CiscoSwitch(ip="127.0.0.1", system_info=None, interfaces=[
         Interface(name="test_interface1", int_type="ethernetCsmacd", mtu=1000, speed=1000, status="up", snmp_index=1),
         Interface(name="test_interface2", int_type="ethernetCsmacd", mtu=1000, speed=1000, status="up", snmp_index=2),
     ])

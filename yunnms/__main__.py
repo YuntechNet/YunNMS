@@ -1,7 +1,4 @@
 from argparse import ArgumentParser
-from os import getcwd
-
-from atomic_p2p.peer.communication.net import JoinHandler
 
 from yunnms import YunNMS
 

@@ -1,13 +1,37 @@
 from typing import List, Dict, Union
 from logging import getLogger
-from re import compile as re_compile
 
-from pysnmp.hlapi import ObjectType, ObjectIdentity
-
-from yunnms.device.abc import SNMPPollABC, SNMPTrapABC
+from ....utils.abc import Serializable
+from ...abc.snmp import SNMPPollABC, SNMPTrapABC
 
 
-class Interface(SNMPPollABC, SNMPTrapABC):
+class Interface(Serializable, SNMPPollABC, SNMPTrapABC):
+    @staticmethod
+    def serialize(obj: "Interface", *args, **kwargs) -> Dict:
+        return {
+            "name": obj.name,
+            "int_type": obj.int_type,
+            "mtu": obj.mtu,
+            "speed": obj.speed,
+            "status": obj.status,
+            "description": obj.description,
+            "phisical_address": obj.phisical_address,
+            "snmp_index": obj.snmp_index,
+        }
+
+    @staticmethod
+    def deserialize(data: Dict, *args, **kwargs) -> "Interface":
+        return Interface(
+            name=data["name"],
+            int_type=data["int_type"],
+            mtu=data["mtu"],
+            speed=data["speed"],
+            status=data["status"],
+            description=data["description"],
+            phisical_address=data["phisical_address"],
+            snmp_index=data["snmp_index"],
+        )
+
     @staticmethod
     def snmp_polls(snmp_conn: "SNMPConnectionABC") -> List[Dict]:
         return snmp_conn.bulk_by(

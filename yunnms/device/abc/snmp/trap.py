@@ -8,9 +8,7 @@ class SNMPTrapABC(ABC):
         self, context: Dict, result: Dict[str, str], *args, **kwargs
     ) -> bool:
         """Method for checking instance can process trap or not"""
-        pass
 
     @abstractclassmethod
     def trap_update(self, context: Dict, result: Dict[str, str]) -> None:
         """Method to handle the traps."""
-        pass

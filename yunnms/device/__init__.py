@@ -3,10 +3,8 @@ from logging import getLogger
 
 from pysnmp.hlapi.asyncore import SnmpEngine
 from atomic_p2p.utils.manager import ThreadManager
-from atomic_p2p.peer import ThreadPeer
 
-from yunnms.role import Role
-from yunnms.device.abc import DeviceABC
+from .abc.device import DeviceABC
 from .communication import SyncHandler
 from .command import HelpCmd, RemoveCmd, ListCmd, NewCmd, ConnectionCmd
 from .trap_server import TrapServer
@@ -42,9 +40,18 @@ class DeviceManager(ThreadManager):
             for (_, device) in self._devices.items():
                 device.update()
 
-    def add_device(self, name, device):
+    def add_device(self, device):
+        name = device.system_info.name
         if isinstance(device, DeviceABC) and name not in self._devices:
             self._devices[name] = device
+
+    def remove_device(self, name):
+        if name in self._devices:
+            del self._devices[name]
+
+    def update_device(self, name, data):
+        if name in self._devices:
+            self._devices[name].update(data=data)
 
     def _register_handler(self):
         installing_handler = [SyncHandler(self)]

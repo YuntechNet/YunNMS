@@ -1,6 +1,6 @@
 from pytest import fixture
 
-from yunnms.device.entity import Interface
+from yunnms.device.entity.inet import Interface
 
 
 @fixture

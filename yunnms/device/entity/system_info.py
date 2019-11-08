@@ -1,9 +1,28 @@
-from typing import Union, List, Dict
+from typing import List, Dict
 
-from yunnms.device.abc import SNMPPollABC
+from ...utils.abc import Serializable
+from ..abc.snmp import SNMPPollABC
 
 
-class SystemInfo(SNMPPollABC):
+class SystemInfo(Serializable, SNMPPollABC):
+    @staticmethod
+    def serialize(obj: "SystemInfo", *args, **kwargs) -> Dict:
+        return {
+            "name": obj.name,
+            "description": obj.description,
+            "cpu_usage": obj.cpu_usage,
+            "memory_usage": obj.memory_usage,
+        }
+
+    @staticmethod
+    def deserialize(data: Dict, *args, **kwargs) -> "SystemInfo":
+        return SystemInfo(
+            name=data["name"],
+            description=data["description"],
+            cpu_usage=data["cpu_usage"],
+            memory_usage=data["memory_usage"],
+        )
+
     @staticmethod
     def new(snmp_conn: "SNMPConnectionABC", *args, **kwargs) -> "SystemInfo":
         system_info = SystemInfo(None, None, 0.0, 0.0)

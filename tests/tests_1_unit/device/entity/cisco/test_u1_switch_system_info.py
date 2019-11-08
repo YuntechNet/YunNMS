@@ -2,8 +2,8 @@
 
 
 def test_calculate(cisco_system_info):
-    cpu = 60 # 60%
-    memory = 70 # 70%
+    cpu = 60.0 # 60%
+    memory = 70.0 # 70%
     free = 30
     used = 70
     cisco_system_info.cpu_5min = cpu
@@ -11,10 +11,8 @@ def test_calculate(cisco_system_info):
     cisco_system_info.memory_free = free
     assert cisco_system_info.cpu_usage != cpu
     assert cisco_system_info.memory_usage != memory
-    cisco_system_info.calculate()
-    assert cisco_system_info.cpu_usage == cpu
-    assert cisco_system_info.memory_usage == memory
-
+    assert cisco_system_info.calculate() == (cpu, memory)
+    
 
 def test_str(cisco_system_info):
     assert str(cisco_system_info) == "CiscoSwitchSystemInfo<CPU_USE: {:2.02f}%, MEM_USE: {:2.02f}%>".format(
