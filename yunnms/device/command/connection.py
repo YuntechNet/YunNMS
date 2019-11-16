@@ -1,4 +1,4 @@
-from atomic_p2p.utils.command import Command
+from atomic_p2p.peer.command import Command
 
 from ..connection import SSHConnection, TelnetConnection
 

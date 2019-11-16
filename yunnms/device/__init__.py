@@ -2,7 +2,7 @@ from typing import Tuple
 from logging import getLogger
 
 from pysnmp.hlapi.asyncore import SnmpEngine
-from atomic_p2p.utils.manager import ThreadManager
+from atomic_p2p.manager import ThreadManager
 
 from .abc.device import DeviceABC
 from .communication import SyncHandler
@@ -44,6 +44,7 @@ class DeviceManager(ThreadManager):
         name = device.system_info.name
         if isinstance(device, DeviceABC) and name not in self._devices:
             self._devices[name] = device
+            self.logger.info("Device: {} added.".format(device))
 
     def remove_device(self, name):
         if name in self._devices:

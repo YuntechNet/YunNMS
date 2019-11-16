@@ -1,7 +1,7 @@
 from typing import Tuple
 from enum import IntEnum
 
-from atomic_p2p.utils.communication import Handler, Packet
+from atomic_p2p.communication import Handler, Packet
 
 from ..entity import DeviceType
 from ..entity.unix import UnixHost

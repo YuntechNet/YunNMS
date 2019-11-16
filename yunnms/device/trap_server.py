@@ -8,7 +8,7 @@ from pysnmp.entity.rfc3413 import ntfrcv
 from pysnmp.proto.api import v2c
 from pysnmp.smi import rfc1902, compiler, view
 
-from atomic_p2p.utils.manager import ThreadManager
+from atomic_p2p.manager import ThreadManager
 
 from ..utils.decorator import Singleton
 from .abc.snmp import SNMPTrapABC

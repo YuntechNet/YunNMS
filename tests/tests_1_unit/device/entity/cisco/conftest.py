@@ -1,7 +1,12 @@
 from pytest import fixture
 
 from yunnms.device.entity.inet import Interface
-from yunnms.device.entity.cisco import CiscoSwitchSystemInfo, CiscoSwitch
+from yunnms.device.entity.cisco import Syslog, CiscoSwitchSystemInfo, CiscoSwitch
+
+
+@fixture(scope="function")
+def syslog():
+    return Syslog()
 
 
 @fixture(scope="function")
@@ -18,8 +23,8 @@ def cisco_system_info():
 
 
 @fixture(scope="function")
-def cisco_switch():
-    return CiscoSwitch(ip="127.0.0.1", system_info=None, interfaces=[
+def cisco_switch(syslog):
+    return CiscoSwitch(ip="127.0.0.1", syslog=syslog, system_info=None, interfaces=[
         Interface(name="test_interface1", int_type="ethernetCsmacd", mtu=1000, speed=1000, status="up", snmp_index=1),
         Interface(name="test_interface2", int_type="ethernetCsmacd", mtu=1000, speed=1000, status="up", snmp_index=2),
     ])

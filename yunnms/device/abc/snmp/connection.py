@@ -5,7 +5,8 @@ from pysnmp.entity import config
 
 
 class SNMPConnectionABC(ABC):
-    def auth_protocol_parse(self, auth_protocol: str) -> Tuple:
+    @staticmethod
+    def auth_protocol_parse(auth_str: str) -> Tuple:
         return {
             "NONE": config.usmNoAuthProtocol,
             "MD5": config.usmHMACMD5AuthProtocol,
@@ -14,15 +15,16 @@ class SNMPConnectionABC(ABC):
             "SHA256": config.usmHMAC192SHA256AuthProtocol,
             "SHA384": config.usmHMAC256SHA384AuthProtocol,
             "SHA512": config.usmHMAC384SHA512AuthProtocol,
-        }[str(auth_protocol).upper()]
+        }[str(auth_str).upper()]
 
-    def priv_protocol_parse(self, priv_protocol: str) -> Tuple:
+    @staticmethod
+    def priv_protocol_parse(priv_str: str) -> Tuple:
         return {
             "NONE": config.usmNoPrivProtocol,
             "DES": config.usmDESPrivProtocol,
             "3DES": config.usm3DESEDEPrivProtocol,
             "AES": config.usmAesCfb128Protocol,
-        }[str(priv_protocol).upper()]
+        }[str(priv_str).upper()]
 
     @abstractmethod
     def authentication_register(self, snmp_engine: "SnmpEngine", **kwargs) -> None:

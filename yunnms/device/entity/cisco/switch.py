@@ -4,6 +4,7 @@ from ...abc.device import DeviceABC
 from ...abc.snmp import SNMPPollABC, SNMPTrapABC
 from .. import DeviceType
 from ..inet import Interface
+from .syslog import Syslog
 from .switch_system_info import CiscoSwitchSystemInfo
 
 
@@ -12,12 +13,17 @@ class CiscoSwitch(DeviceABC, SNMPPollABC, SNMPTrapABC):
     def new(ip: str, snmp_conn: "SNMPConnectionABC") -> "CiscoSwitch":
         return CiscoSwitch(
             ip=ip,
+            syslog=Syslog.new(snmp_conn=snmp_conn),
             system_info=CiscoSwitchSystemInfo.new(snmp_conn=snmp_conn),
             interfaces=Interface.new_interfaces(snmp_conn=snmp_conn),
         )
 
     def __init__(
-        self, ip: str, system_info: "SystemInfo", interfaces: List["Interface"]
+        self,
+        ip: str,
+        syslog: "Syslog",
+        system_info: "SystemInfo",
+        interfaces: List["Interface"],
     ) -> None:
         super().__init__(
             ip=ip,
@@ -25,6 +31,7 @@ class CiscoSwitch(DeviceABC, SNMPPollABC, SNMPTrapABC):
             system_info=system_info,
             interfaces=interfaces,
         )
+        self.syslog = syslog
 
     def snmp_poll(self, snmp_conn: "SNMPConnectionABC") -> List[object]:
         return [
@@ -41,6 +48,8 @@ class CiscoSwitch(DeviceABC, SNMPPollABC, SNMPTrapABC):
         return context["transportAddress"][0] == self.ip
 
     def trap_update(self, context: Dict, result: Dict) -> None:
+        if self.syslog.is_trap_match(context=context, result=result) is True:
+            self.syslog.trap_update(context=context, result=result)
         for each in self.interfaces:
             if each.is_trap_match(context=context, result=result) is True:
                 return each.trap_update(context=context, result=result)

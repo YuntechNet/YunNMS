@@ -1,6 +1,7 @@
-from atomic_p2p.utils.command import Command
+from atomic_p2p.peer.command import Command
 
 from ..entity.cisco.switch import CiscoSwitch
+from ..abc.snmp.connection import SNMPConnectionABC
 from ..connection import SNMPv3Connection as SNMPv3
 from .connection import ConnectionCmd
 
@@ -13,9 +14,10 @@ class HelpCmd(Command):
         Usage in prompt: peer help [cmd]
     """
 
-    def __init__(self, peer):
+    def __init__(self, device_manager):
         super(HelpCmd, self).__init__("help")
-        self.peer = peer
+        self.device_manager = device_manager
+        self.peer = device_manager.peer
 
     def _execute(self, msg_arr):
         if msg_arr != [] and msg_arr[0] in self.peer.commands:
@@ -47,13 +49,14 @@ class ListCmd(Command):
         self.peer = device_manager.peer
 
     def _execute(self, msg_arr):
-        msg = ""
-        hostname = msg_arr[0]
-        for each in self.device_manager._devices.items():
-            if each.info.hostname == hostname:
-                for every in each.interfaces:
-                    msg = "{}\n{}".format(msg, str(every))
-        return msg
+        if len(self.device_manager._devices.items()) == 0:
+            return "There is no devices in manager."
+        else:
+            output_text = "Current device info:\n"
+            for each in self.device_manager._devices.items():
+                output_text += " - " + str(each) + "\n"
+            output_text += "[---End of list---]"
+            return output_text
 
 
 class NewCmd(Command):
@@ -79,15 +82,21 @@ class NewCmd(Command):
             snmpEngine=self.device_manager._snmp_engine, host=(msg_arr[2], 161)
         )
         snmpv3.authentication_register(
-            user_name=msg_arr[3],
-            auth_protocol=msg_arr[4],
-            priv_protocol=msg_arr[6],
-            auth_key=msg_arr[5],
-            priv_key=msg_arr[7],
+            authentication={
+                "user_name": msg_arr[3],
+                "auth_protocol": SNMPConnectionABC.auth_protocol_parse(
+                    auth_str=msg_arr[4]
+                ),
+                "auth_key": msg_arr[5],
+                "priv_protocol": SNMPConnectionABC.priv_protocol_parse(
+                    priv_str=msg_arr[6]
+                ),
+                "priv_key": msg_arr[7],
+            }
         )
         if device_type == "CiscoSwitch":
             added_device = CiscoSwitch.new(ip=msg_arr[2], snmp_conn=snmpv3)
-            self.device_manager.add_device(device_name, added_device)
+            self.device_manager.add_device(added_device)
             return "{} added.".format(str(added_device))
         return "Added failed with device type {}.".format(device_type)
 
