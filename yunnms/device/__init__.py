@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 from logging import getLogger
 
 from pysnmp.hlapi.asyncore import SnmpEngine
@@ -6,7 +6,7 @@ from atomic_p2p.manager import ThreadManager
 
 from .abc.device import DeviceABC
 from .communication import SyncHandler
-from .command import HelpCmd, RemoveCmd, ListCmd, NewCmd, ConnectionCmd
+from .command import HelpCmd, RemoveCmd, ListCmd, NewCmd, ConnectionCmd, SyslogListCmd
 from .trap_server import TrapServer
 
 
@@ -46,6 +46,11 @@ class DeviceManager(ThreadManager):
             self._devices[name] = device
             self.logger.info("Device: {} added.".format(device))
 
+    def get_device(self, name: str) -> Optional["DeviceABC"]:
+        if name in self._devices:
+            return self._devices[name]
+        return None
+
     def remove_device(self, name):
         if name in self._devices:
             del self._devices[name]
@@ -66,6 +71,7 @@ class DeviceManager(ThreadManager):
             ListCmd(self),
             NewCmd(self),
             ConnectionCmd(self),
+            SyslogListCmd(self),
         ]
         for each in installing_commands:
             self.peer.register_command(command=each)

@@ -4,8 +4,16 @@ from ..entity.cisco.switch import CiscoSwitch
 from ..abc.snmp.connection import SNMPConnectionABC
 from ..connection import SNMPv3Connection as SNMPv3
 from .connection import ConnectionCmd
+from .cisco import SyslogListCmd
 
-__all__ = ["HelpCmd", "ListCmd", "NewCmd", "RemoveCmd", "ConnectionCmd"]
+__all__ = [
+    "HelpCmd",
+    "ListCmd",
+    "NewCmd",
+    "RemoveCmd",
+    "ConnectionCmd",
+    "SyslogListCmd",
+]
 
 
 class HelpCmd(Command):
@@ -54,7 +62,7 @@ class ListCmd(Command):
         else:
             output_text = "Current device info:\n"
             for each in self.device_manager._devices.items():
-                output_text += " - " + str(each) + "\n"
+                output_text += " - {}\n".format(each)
             output_text += "[---End of list---]"
             return output_text
 

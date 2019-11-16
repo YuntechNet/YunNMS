@@ -1,0 +1,9 @@
+version: "3.2"
+
+services:
+  yunnms:
+    image: "yunnms:latest"
+    command: "-as -lmp 0000 127.0.0.1:8000"
+    ports: [
+      "17031:17031",
+    ]

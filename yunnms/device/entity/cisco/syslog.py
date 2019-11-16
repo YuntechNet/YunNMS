@@ -22,6 +22,14 @@ class LogEntry(object):
         self.msg_text = msg_text
         self.timestamp = timestamp
 
+    def __str__(self) -> str:
+        return "Log<f={}, s={}, n={}, t={}, ts={}".format(
+            self.facility, self.severity, self.msg_name, self.msg_text, self.timestamp
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
 
 class Syslog(SNMPTrapABC):
     @staticmethod
@@ -43,7 +51,6 @@ class Syslog(SNMPTrapABC):
             k: v for (k, v) in result.items() if "CISCO-SYSLOG-MIB::clogHist" in k
         }
         index = int(next(iter(logResult.keys())).split(".")[1])
-        print(logResult["CISCO-SYSLOG-MIB::clogHistFacility.{}".format(index)])
         self.logs.append(
             LogEntry(
                 index=index,

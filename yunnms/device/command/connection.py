@@ -11,7 +11,7 @@ class ConnectionCmd(Command):
     """
 
     def __init__(self, device):
-        super(ConnectionCmd, self).__init__("connection")
+        super().__init__("connection")
         self.device = device
         self.peer = device.peer
         self.commands = {"add": AddCmd(self.device)}
@@ -36,7 +36,7 @@ class AddCmd(Command):
     """
 
     def __init__(self, device):
-        super(AddCmd, self).__init__("connection.add")
+        super().__init__("connection.add")
         self.device = device
         self.peer = device.peer
 
