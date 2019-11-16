@@ -44,6 +44,7 @@ class DeviceManager(ThreadManager):
         name = device.system_info.name
         if isinstance(device, DeviceABC) and name not in self._devices:
             self._devices[name] = device
+            self.trap_server.update_devices(device=device)
             self.logger.info("Device: {} added.".format(device))
 
     def get_device(self, name: str) -> Optional["DeviceABC"]:

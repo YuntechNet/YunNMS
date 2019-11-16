@@ -64,8 +64,12 @@ class TrapServer(ThreadManager):
             authKey=authentication["auth_key"],
             privProtocol=authentication["priv_protocol"],
             privKey=authentication["priv_key"],
-            securityEngineId=v2c.OctetString(hexValue=authentication["engineId"]),
+            securityEngineId=v2c.OctetString(hexValue=authentication["engine_id"]),
         )
+    
+    def update_devices(self, device):
+        if isinstance(device, SNMPTrapABC) is True and device not in self._devices:
+            self._devices.append(device)
 
     def cbFun(self, stateReference, contextEngineId, contextName, varBinds, cbCtx):
         self.logger.debug(

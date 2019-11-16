@@ -49,7 +49,7 @@ class YunNMS(object):
 
     def _on_command(self, cmd):
         if type(cmd) != list and type(cmd) == str:
-            cmd = cmd.split(" ")
+            cmd = cmd.strip().split(" ")
 
         service_key = cmd[0].lower()
         if service_key in ["peer", "monitor", "device"]:

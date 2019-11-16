@@ -72,7 +72,7 @@ class NewCmd(Command):
         Command to new a device.
         Usage in prompt:
             device new device_type device_name ip account auth_protocol
-             auth_password priv_protocol priv_password
+             auth_password priv_protocol priv_password engine_id
     """
 
     def __init__(self, device_manager):
@@ -86,22 +86,24 @@ class NewCmd(Command):
         if device_name in self.device_manager._devices:
             return "{} already exists".format(device_name)
 
+        authentication = {
+            "user_name": msg_arr[3],
+            "auth_protocol": SNMPConnectionABC.auth_protocol_parse(
+                auth_str=msg_arr[4]
+            ),
+            "auth_key": msg_arr[5],
+            "priv_protocol": SNMPConnectionABC.priv_protocol_parse(
+                priv_str=msg_arr[6]
+            ),
+            "priv_key": msg_arr[7],
+        }
         snmpv3 = SNMPv3(
             snmpEngine=self.device_manager._snmp_engine, host=(msg_arr[2], 161)
         )
-        snmpv3.authentication_register(
-            authentication={
-                "user_name": msg_arr[3],
-                "auth_protocol": SNMPConnectionABC.auth_protocol_parse(
-                    auth_str=msg_arr[4]
-                ),
-                "auth_key": msg_arr[5],
-                "priv_protocol": SNMPConnectionABC.priv_protocol_parse(
-                    priv_str=msg_arr[6]
-                ),
-                "priv_key": msg_arr[7],
-            }
-        )
+        snmpv3.authentication_register(authentication=authentication)
+        if len(msg_arr) == 9:
+            authentication["engine_id"] = msg_arr[8]
+            self.device_manager.trap_server.add_user(authentication=authentication)
         if device_type == "CiscoSwitch":
             added_device = CiscoSwitch.new(ip=msg_arr[2], snmp_conn=snmpv3)
             self.device_manager.add_device(added_device)
