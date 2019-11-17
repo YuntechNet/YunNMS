@@ -1,5 +1,7 @@
 [run]
 omit = 
     35venv/*
+    36venv/*
     tests/*
     setup.py
+    test_*.py

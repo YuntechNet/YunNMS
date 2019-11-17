@@ -1,8 +1,4 @@
-from .device import Device
-from .device_info import DeviceInfo
-from .enums import SpeedRate
-from .interface import Interface
+from .device_type import DeviceType
+from .system_info import SystemInfo
 
-__all__ = [
-    Device, DeviceInfo, SpeedRate, Interface
-]
+__all__ = ["DeviceType", "SystemInfo"]

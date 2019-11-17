@@ -1,62 +1,78 @@
+from typing import Tuple, Optional
+from logging import getLogger
+
 from pysnmp.hlapi.asyncore import SnmpEngine
+from atomic_p2p.manager import ThreadManager
 
-from atomic_p2p.peer import Peer
-from atomic_p2p.utils.manager import ProcManager
-from atomic_p2p.utils.logging import getLogger
-
-from .command import HelpCmd, AddCmd, RemoveCmd, ListCmd
+from .abc.device import DeviceABC
+from .communication import SyncHandler
+from .command import HelpCmd, RemoveCmd, ListCmd, NewCmd, ConnectionCmd, SyslogListCmd
 from .trap_server import TrapServer
 
 
-class DeviceManager(ProcManager):
-
-    def __init__(self, peer, loop_delay=60):
+class DeviceManager(ThreadManager):
+    def __init__(
+        self,
+        peer: "Peer",
+        trap_host: Tuple[str, int] = ("0.0.0.0", 162),
+        loop_delay: int = 60,
+        logger=getLogger(),
+    ):
+        super().__init__(loopDelay=loop_delay, logger=logger)
         self.peer = peer
-        super(DeviceManager, self).__init__(
-            loopDelay=loop_delay, auto_register=True,
-            logger=getLogger(__name__))
-        self.devices = []
+        self._register_handler()
+        self._register_command()
+
+        self._devices = {}
         self._snmp_engine = SnmpEngine()
-        # self.trap_server = TrapServer()
-
-    def _register_handler(self):
-        pass
-
-    def _register_command(self):
-        self.commands = {
-            'help': HelpCmd(self),
-            'add': AddCmd(self),
-            'remove': RemoveCmd(self),
-            'list': ListCmd(self)
-        }
-
-    def onProcess(self, msg_arr, **kwargs):
-        try:
-            msg_key = msg_arr[0].lower()
-            msg_arr = msg_arr[1:]
-            if msg_key in self.commands:
-                return self.commands[msg_key]._on_process(msg_arr)
-            return self.commands['help']._on_process(msg_arr)
-        except Exception as e:
-            return self.commands['help']._on_process(msg_arr)
+        self.trap_server = TrapServer(host=trap_host)
 
     def start(self):
-        super(DeviceManager, self).start()
-        # self.trap_server.start()    # L18
+        super().start()
+        self.trap_server.start()
 
     def stop(self):
-        super(DeviceManager, self).stop()
-        # self.trap_server.stop()     # L18
+        super().stop()
+        self.trap_server.stop()
 
     def run(self):
-        while not self.stopped.wait(self.loopDelay):
-            pass
+        while self.stopped.wait(self.loopDelay) is False:
+            for (_, device) in self._devices.items():
+                device.update()
 
-    def addDevice(self, device):
-        if type(device) is Device and device not in self.devices:
-            self.devices.append(device)
-            if device.connect_type == 'snmp':
-                device.snmp_v3_init()
-            else:
-                device.fetch_running_config()
-                device.fetch_interface_status()
+    def add_device(self, device):
+        name = device.system_info.name
+        if isinstance(device, DeviceABC) and name not in self._devices:
+            self._devices[name] = device
+            self.trap_server.update_devices(device=device)
+            self.logger.info("Device: {} added.".format(device))
+
+    def get_device(self, name: str) -> Optional["DeviceABC"]:
+        if name in self._devices:
+            return self._devices[name]
+        return None
+
+    def remove_device(self, name):
+        if name in self._devices:
+            del self._devices[name]
+
+    def update_device(self, name, data):
+        if name in self._devices:
+            self._devices[name].update(data=data)
+
+    def _register_handler(self):
+        installing_handler = [SyncHandler(self)]
+        for each in installing_handler:
+            self.peer.register_handler(handler=each)
+
+    def _register_command(self):
+        installing_commands = [
+            HelpCmd(self),
+            RemoveCmd(self),
+            ListCmd(self),
+            NewCmd(self),
+            ConnectionCmd(self),
+            SyslogListCmd(self),
+        ]
+        for each in installing_commands:
+            self.peer.register_command(command=each)

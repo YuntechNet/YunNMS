@@ -1,4 +1,4 @@
-# YunNMS [![Build Status](https://travis-ci.org/YuntechNet/YunNMS.svg?branch=master)](https://travis-ci.org/YuntechNet/YunNMS) [![codecov](https://codecov.io/gh/YuntechNet/YunNMS/branch/master/graph/badge.svg)](https://codecov.io/gh/YuntechNet/YunNMS)
+# YunNMS [![Build Status](https://travis-ci.com/YuntechNet/YunNMS.svg?branch=master)](https://travis-ci.com/YuntechNet/YunNMS) [![codecov](https://codecov.io/gh/YuntechNet/YunNMS/branch/master/graph/badge.svg)](https://codecov.io/gh/YuntechNet/YunNMS)
 A high-avalabile, distribute network management system.
 
 ## Feature

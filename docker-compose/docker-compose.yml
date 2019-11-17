@@ -1,4 +1,4 @@
-version: "3"
+version: "3.2"
 
 services:
   test_ubuntu:
@@ -7,3 +7,17 @@ services:
     ports:
       - "127.0.0.1:7022:22"
       - "127.0.0.1:7023:23"
+
+  snmpd:
+    image: crazymax/snmpd
+    container_name: snmpd
+    privileged: true
+    ports:
+      - target: 161
+        published: 161
+        protocol: udp
+    volumes:
+      - "/:/rootfs:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./snmpd.conf:/etc/snmpd.conf"
+    restart: always
